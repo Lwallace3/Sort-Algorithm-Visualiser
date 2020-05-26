@@ -10,6 +10,7 @@ class Bar:
         self.x = x
         self.y = y
         self.height = height
+        self.color = (255, 255, 255)
 
 
 class Chart:
@@ -27,7 +28,7 @@ class Chart:
 
     def draw_chart(self, window):
         for bar in self.bars:
-            pygame.draw.rect(window, (255, 255, 255), (bar.x, bar.y, 10, -bar.height))
+            pygame.draw.rect(window, bar.color, (bar.x, bar.y, 1000 / len(self.bars) - 1, -bar.height))
 
         pygame.draw.line(window, (255, 255, 255), (0, 400), (1000, 400))
 
@@ -35,11 +36,14 @@ class Chart:
 def bubble_sort(window, chart):
     for i in range(len(chart.bars) - 1):
         for j in range(0, len(chart.bars) - i - 1):
+            chart.bars[j].color = (0, 255, 0)
+            chart.bars[j + 1].color = (255, 0, 0)
             if chart.bars[j].height > chart.bars[j + 1].height:
                 chart.bars[j].height, chart.bars[j + 1].height = chart.bars[j + 1].height, chart.bars[j].height
             redraw_window(window, chart)
             pygame.time.wait(1)
             pygame.display.flip()
+            chart.bars[j].color, chart.bars[j + 1].color = (255, 255, 255), (255, 255, 255)
 
 
 def selection_sort(window, chart):
@@ -48,10 +52,15 @@ def selection_sort(window, chart):
         for j in range(i + 1, len(chart.bars)):
             if chart.bars[min_index].height > chart.bars[j].height:
                 min_index = j
+
+        chart.bars[i].color = (0, 255, 0)
+        chart.bars[min_index].color = (255, 0, 0)
         chart.bars[i].height, chart.bars[min_index].height = chart.bars[min_index].height, chart.bars[i].height
         redraw_window(window, chart)
-        pygame.time.wait(100)
+        pygame.time.wait(50)
         pygame.display.flip()
+
+        chart.bars[i].color, chart.bars[min_index].color = (255, 255, 255), (255, 255, 255)
 
 
 def insertion_sort(window, chart):
@@ -62,9 +71,14 @@ def insertion_sort(window, chart):
             chart.bars[j + 1].height = chart.bars[j].height
             j -= 1
         chart.bars[j + 1].height = key
+
+        chart.bars[j].color = (0, 255, 0)
+        chart.bars[j + 1].color = (255, 0, 0)
+
         redraw_window(window, chart)
-        pygame.time.wait(100)
+        pygame.time.wait(50)
         pygame.display.flip()
+        chart.bars[j].color, chart.bars[j + 1].color = (255, 255, 255), (255, 255, 255)
 
 
 def create_rand_bars(num_of_bars, window_width):
@@ -80,25 +94,32 @@ def create_rand_bars(num_of_bars, window_width):
 def redraw_window(window, chart):
     window.fill((0, 0, 0))
     chart.draw_chart(window)
+    font = pygame.font.SysFont("Helvetica", 30)
 
-    text = pygame.font.SysFont("Helvetica", 30).render("Randomize", 1, (255, 255, 255))
+    text = pygame.font.SysFont("Helvetica", 25).render("-10 Bars", 1, (255, 255, 255))
+    window.blit(text, (200, 0))
+
+    text = font.render("Randomize", 1, (255, 255, 255))
     window.blit(text, (450, 0))
 
-    text = pygame.font.SysFont("Helvetica", 30).render("Selection Sort", 1, (255, 255, 255))
+    text = pygame.font.SysFont("Helvetica", 25).render("+10 Bars", 1, (255, 255, 255))
+    window.blit(text, (700, 0))
+
+    text = font.render("Selection Sort", 1, (255, 255, 255))
     window.blit(text, (200, 450))
 
-    text = pygame.font.SysFont("Helvetica", 30).render("Bubble Sort", 1, (255, 255, 255))
+    text = font.render("Bubble Sort", 1, (255, 255, 255))
     window.blit(text, (450, 450))
 
-    text = pygame.font.SysFont("Helvetica", 30).render("Insertion Sort", 1, (255, 255, 255))
+    text = font.render("Insertion Sort", 1, (255, 255, 255))
     window.blit(text, (700, 450))
-
 
 def main():
     window = pygame.display.set_mode((1000, 500))
     pygame.display.set_caption("Algorithm Visualiser")
     run = True
     chart = Chart(create_rand_bars(50, 1000))
+    num_of_bars = 50
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -106,15 +127,20 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 position = pygame.mouse.get_pos()
                 print(position)
-                if 450 < position[0] < 580 and 8 < position[1] < 28:
-                    chart = Chart(create_rand_bars(50, 1000))
+                if 450 < position[0] < 580 and 0 < position[1] < 30:
+                    chart = Chart(create_rand_bars(num_of_bars, 1000))
                 if 200 < position[0] < 360 and 450 < position[1] < 490:
                     selection_sort(window, chart)
                 if 450 < position[0] < 600 and 450 < position[1] < 490:
                     bubble_sort(window, chart)
                 if 700 < position[0] < 850 and 450 < position[1] < 490:
                     insertion_sort(window, chart)
-
+                if 200 < position[0] < 280 and 0 < position[1] < 30:
+                    num_of_bars -= 10
+                    chart = Chart(create_rand_bars(num_of_bars, 1000))
+                if 700 < position[0] < 780 and 0 < position[1] < 30:
+                    num_of_bars += 10
+                    chart = Chart(create_rand_bars(num_of_bars, 1000))
         redraw_window(window, chart)
         pygame.display.flip()
 
